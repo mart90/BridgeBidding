@@ -9,8 +9,6 @@ namespace BridgeBidding
         {
             BiddingRound = biddingRound;
             UserHand = userHand;
-
-
         }
 
         public BiddingRound BiddingRound { get; set; }
