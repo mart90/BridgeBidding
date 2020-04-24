@@ -28,9 +28,12 @@ namespace BridgeBidding
 
             if (Bid.IsPass)
             {
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.Write("\nPass");
-                Console.ForegroundColor = ConsoleColor.White;
+                if (!Reason.StartsWith("Opener's rebids not yet implemented"))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    Console.Write("\nPass");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
             }
             else
             {
@@ -56,7 +59,14 @@ namespace BridgeBidding
             if (Reason != null)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine($"Reason: {Reason}");
+                if (!Reason.StartsWith("Opener's rebids not yet implemented"))
+                {
+                    Console.WriteLine($"Reason: {Reason}");
+                }
+                else
+                {
+                    Console.WriteLine(Reason);
+                }
                 Console.ForegroundColor = ConsoleColor.White;
             }
 
