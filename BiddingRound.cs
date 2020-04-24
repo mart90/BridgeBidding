@@ -120,7 +120,17 @@ namespace BridgeBidding
                 if (BiddingMode == BiddingMode.Opening)
                 {
                     // An opponent opened
-                    BiddingMode = BiddingMode.Overcall;
+                    BiddingMode = BiddingMode.Improvise;
+                }
+                else if (BiddingMode == BiddingMode.OpenersRebid)
+                {
+                    // Opponent overcalled. No change
+                    return;
+                }
+                else if (BiddingMode == BiddingMode.Responding)
+                {
+                    // Opponent overcalled. No change
+                    return;
                 }
                 else
                 {
