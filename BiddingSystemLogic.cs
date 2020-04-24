@@ -121,7 +121,7 @@ namespace BridgeBidding
                     return new BiddingSystemFeedback
                     {
                         Bid = new Bid { Suit = suit, NumberOfTricks = 1 },
-                        Reason = $"Balanced hand with 12-14 total points, and 5 {suit.ToString()}."
+                        Reason = $"Balanced hand with 12-14 total points and 5 {suit.ToString()}."
                     };
                 }
 
@@ -196,10 +196,22 @@ namespace BridgeBidding
 
             // Unbalanced hand and 12-21 total points
 
+            if (UserHand.LowestRankingLongestMajor.AmountOfCards >= 5)
+            {
+                // Prefer majors
+                return new BiddingSystemFeedback
+                {
+                    Bid = new Bid { Suit = UserHand.LowestRankingLongestMajor.Suit, NumberOfTricks = 1 },
+                    Reason = "Unbalanced hand with 12-21 total points. If there are multiple long major suits we bid the lowest ranking one first."
+                };
+            }
+
+            // No 5+ card majors
+
             return new BiddingSystemFeedback
             {
                 Bid = new Bid { Suit = UserHand.LowestRankingLongestSuit.Suit, NumberOfTricks = 1 },
-                Reason = "Unbalanced hand with 12-21 total points. If there are multiple long suits we bid the longest, lowest ranking one first."
+                Reason = "Unbalanced hand with 12-21 total points, no 5+ card majors. If there are multiple long minor suits we bid the longest, lowest ranking one first."
             };
         }
 

@@ -71,17 +71,25 @@ namespace BridgeBidding
                     else if (round.BiddingMode == BiddingMode.Responding)
                     {
                         biddingLogic.RespondingBid().ToConsole();
+                        return;
                     }
                     else if (round.BiddingMode == BiddingMode.OpenersRebid)
                     {
                         biddingLogic.OpenersRebid().ToConsole();
+                        return;
                     }
 
                     bid = GetBidFromUserInput("Your bid: ");
                 }
+                else if (round.CurrentBiddingPlayer == round.Partner)
+                {
+                    bid = GetBidFromUserInput("Partner's bid: ");
+                    //bid = GetBidFromUserInput($"{biddingPlayer.Position.ToString()} bid: ");
+                }
                 else
                 {
-                    bid = GetBidFromUserInput($"{biddingPlayer.Position.ToString()} bid: ");
+                    // Opponents pass every turn (for now)
+                    bid = new Bid().SetPass();
                 }
 
                 if (bid == null)
