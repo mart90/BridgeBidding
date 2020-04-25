@@ -35,21 +35,31 @@ namespace BridgeBidding
         public Player Opener => GetPlayerByPosition(BiddingHistory.First(e => e.IsRaise).PlayerPosition);
 
         public Bid OpeningBid => BiddingHistory.FirstOrDefault(e => e.IsRaise);
-        public Bid LatestNonPassBid => BiddingHistory.LastOrDefault(e => !e.IsPass);
-        public Bid LatestRaise => BiddingHistory.LastOrDefault(e => e.IsRaise);
+        public Bid LastNonPassBid => BiddingHistory.LastOrDefault(e => !e.IsPass);
+        public Bid LastRaise => BiddingHistory.LastOrDefault(e => e.IsRaise);
         public List<Bid> AllRaises => BiddingHistory.Where(e => e.IsRaise).ToList();
-        public Bid LatestPartnerBid => Partner.Bids.Last();
+        public Bid LastPartnerBid => Partner.Bids.Last();
 
-        public Bid LatestOpponentBid()
+        public Bid LastOpponentBid()
         {
             PlayerPosition partnerPosition = GetOppositePlayerPosition(UserPosition);
             return BiddingHistory.LastOrDefault(e => e.PlayerPosition != UserPosition && e.PlayerPosition != partnerPosition);
         }
 
-        public Bid LastRaiseBeforePartnerRaise()
+        public List<Bid> AllOpponentRaises()
         {
-            int partnerBidIndex = BiddingHistory.IndexOf(LatestPartnerBid);
-            return BiddingHistory.Take(partnerBidIndex).Last(e => e.IsRaise);
+            PlayerPosition partnerPosition = GetOppositePlayerPosition(UserPosition);
+
+            return BiddingHistory
+                .Where(e => e.IsRaise)
+                .Where(e => e.PlayerPosition != UserPosition && e.PlayerPosition != partnerPosition)
+                .ToList();
+        }
+
+        public Bid LastBidBeforePartnerBid()
+        {
+            int partnerBidIndex = BiddingHistory.IndexOf(LastPartnerBid);
+            return BiddingHistory.Take(partnerBidIndex).Last();
         }
 
         public bool BiddingEnded => BiddingHistory.Count > 3 && BiddingHistory.TakeLast(3).All(e => e.IsPass);

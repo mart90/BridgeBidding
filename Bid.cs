@@ -43,6 +43,22 @@
             return $"{NumberOfTricks} {suit}";
         }
 
+        public bool IsHigherThan(Bid otherBid)
+        {
+            if (NumberOfTricks > otherBid.NumberOfTricks)
+            {
+                return true;
+            }
+            else if (NumberOfTricks == otherBid.NumberOfTricks)
+            {
+                return (int)Suit < (int)otherBid.Suit;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Returns 1 if level is the same
         /// </summary>

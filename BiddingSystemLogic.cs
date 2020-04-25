@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BridgeBidding
@@ -220,7 +221,7 @@ namespace BridgeBidding
         /// </summary>
         public BiddingSystemFeedback RespondingBid()
         {
-            Bid lastPartnerBid = BiddingRound.LatestPartnerBid;
+            Bid lastPartnerBid = BiddingRound.LastPartnerBid;
             int partnerBidLevel = lastPartnerBid.NumberOfTricks;
             Suit partnerBidSuit = lastPartnerBid.Suit;
 
@@ -858,13 +859,15 @@ namespace BridgeBidding
         /// </summary>
         public BiddingSystemFeedback OpenersRebid()
         {
-            Bid lastPartnerBid = BiddingRound.LatestPartnerBid;
+            Bid lastPartnerBid = BiddingRound.LastPartnerBid;
             int partnerBidLevel = lastPartnerBid.NumberOfTricks;
             Suit partnerBidSuit = lastPartnerBid.Suit;
 
             Bid openingBid = BiddingRound.OpeningBid;
             int openingBidLevel = openingBid.NumberOfTricks;
             Suit openingBidSuit = openingBid.Suit;
+
+            Bid opponentOvercall = BiddingRound.LastBidBeforePartnerBid();
 
             int highestCardCount = UserHand.MaxAmountOfCardsInASuit;
             int lowestCardCount = UserHand.MinAmountOfCardsInASuit;
@@ -873,6 +876,39 @@ namespace BridgeBidding
             int highestMinorCardCount = UserHand.MinorSuits.Max(e => e.AmountOfCards);
 
             int hcp = UserHand.HighCardPoints;
+
+            if (!opponentOvercall.IsPass)
+            {
+                if (lastPartnerBid.IsPass)
+                {
+                    // Partner passed after overcall
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.WriteLine("\nPartner passed after an overcall. This could mean they have a slightly better hand than we think.");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    // Modify the partner bid level to stop us from misinterpreting their bid
+
+                    int levelDiff = Bid.LevelDifference(lastPartnerBid, openingBid) - Bid.LevelDifference(opponentOvercall, openingBid);
+
+                    if (levelDiff == 0)
+                    {
+                        // Overcall did not affect partner's response
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine("\nWe were overcalled, but this didn't necessarily affect our partner's response. We are interpreting it normally.");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        partnerBidLevel -= levelDiff;
+
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.WriteLine($"\nWe were overcalled, and this affected our partner's response. We are interpreting it as if they bid {levelDiff} level(s) lower.");
+                        Console.ResetColor();
+                    }
+                }
+            }
 
             string partnerInfo;
 

@@ -25,7 +25,7 @@ namespace BridgeBidding
 
                 BiddingRoundHistory.Add(round);
 
-                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nNew hand\n");
                 Console.ForegroundColor = ConsoleColor.White;
 
@@ -48,11 +48,9 @@ namespace BridgeBidding
                     return;
                 }
 
-                Player biddingPlayer = round.CurrentBiddingPlayer;
-
                 Bid bid;
 
-                if (biddingPlayer == round.User)
+                if (round.CurrentBiddingPlayer == round.User)
                 {
                     // It's our turn to bid
 
@@ -64,18 +62,30 @@ namespace BridgeBidding
                         return;
                     }
 
+                    BiddingSystemFeedback feedback = null;
+
                     if (round.BiddingMode == BiddingMode.Opening)
                     {
-                        biddingLogic.OpeningBid().ToConsole();
+                        feedback = biddingLogic.OpeningBid();
                     }
                     else if (round.BiddingMode == BiddingMode.Responding)
                     {
-                        biddingLogic.RespondingBid().ToConsole();
-                        return;
+                        feedback = biddingLogic.RespondingBid();
+                        feedback.ModifyLevelIfOpponentRaised(round);
                     }
                     else if (round.BiddingMode == BiddingMode.OpenersRebid)
                     {
-                        biddingLogic.OpenersRebid().ToConsole();
+                        feedback = biddingLogic.OpenersRebid();
+                    }
+
+                    if (feedback != null)
+                    {
+                        feedback.ToConsole();
+                    }
+
+                    if (round.BiddingMode == BiddingMode.Responding || round.BiddingMode == BiddingMode.OpenersRebid)
+                    {
+                        // Can't help the user after this
                         return;
                     }
 
@@ -84,16 +94,15 @@ namespace BridgeBidding
                 else if (round.CurrentBiddingPlayer == round.Partner)
                 {
                     bid = GetBidFromUserInput("Partner's bid: ");
-                    //bid = GetBidFromUserInput($"{biddingPlayer.Position.ToString()} bid: ");
                 }
                 else
                 {
-                    // Opponents pass every turn (for now)
-                    bid = new Bid().SetPass();
+                    bid = GetBidFromUserInput($"{round.CurrentBiddingPlayer.Position.ToString()} bid: ");
                 }
 
                 if (bid == null)
                 {
+                    // User input "break"
                     return;
                 }
 
