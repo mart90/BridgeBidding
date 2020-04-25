@@ -824,6 +824,19 @@ namespace BridgeBidding
                     };
                 }
 
+                if (UserHand.LowestRankingLongestSuit.AmountOfCards >= 6)
+                {
+                    Suit lowestRankingLongestSuit = UserHand.LowestRankingLongestSuit.Suit;
+                    int numberOfTricks = (int)lowestRankingLongestSuit > (int)partnerBidSuit ? 4 : 3;
+
+                    return new BiddingSystemFeedback
+                    {
+                        Bid = new Bid { Suit = lowestRankingLongestSuit, NumberOfTricks = numberOfTricks },
+                        PartnerInfo = partnerInfo,
+                        Reason = $"Response to 3 {partnerBidSuit.ToString()}. 16+ points and 6+ {lowestRankingLongestSuit.ToString()}"
+                    };
+                }
+
                 return Pass(partnerInfo);
             }
 
@@ -1137,6 +1150,10 @@ namespace BridgeBidding
                     {
                         partnerInfo = $"16+ HCP and 3+ {openingBidSuit.ToString()}";
                     }
+                }
+                else if (partnerBidSuit != Suit.NoTrump)
+                {
+                    partnerInfo = $"16+ HCP and 6+ {partnerBidSuit.ToString()}";
                 }
                 else // Partner bid 3 NT
                 {

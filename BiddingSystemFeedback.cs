@@ -30,7 +30,7 @@ namespace BridgeBidding
 
             if (Bid.IsPass)
             {
-                if (!Reason.StartsWith("Opener's rebids not yet implemented"))
+                if (Reason == null || !Reason.StartsWith("Opener's rebids not yet implemented"))
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
                     Console.Write("\nPass");
