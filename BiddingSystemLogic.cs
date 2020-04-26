@@ -50,20 +50,8 @@ namespace BridgeBidding
                 {
                     if (UserHand.LongestSuits.All(e => e.Suit == Suit.Clubs))
                     {
-                        // A bid of 2 clubs means something else. Only bid 3 clubs if we are strong
-                        if (hcp >= 8)
-                        {
-                            return new BiddingSystemFeedback
-                            {
-                                Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = 3 },
-                                ExtraRequirements = "only with 2+ honors",
-                                Reason = "8-10 HCP and 6 Clubs. Can't bid 2 Clubs because it has special meaning, so we jump to 3 but only with good quality."
-                            };
-                        }
-                        else
-                        {
-                            return Pass();
-                        }
+                        // A bid of 2 clubs means something else.
+                        return Pass();
                     }
 
                     var feedback = new BiddingSystemFeedback
@@ -915,6 +903,7 @@ namespace BridgeBidding
                     else
                     {
                         partnerBidLevel -= levelDiff;
+                        lastPartnerBid.NumberOfTricks -= levelDiff;
 
                         Console.ForegroundColor = ConsoleColor.DarkRed;
                         Console.WriteLine($"\nWe were overcalled, and this affected our partner's response. We are interpreting it as if they bid {levelDiff} level(s) lower.");
@@ -1173,7 +1162,7 @@ namespace BridgeBidding
             }
             else // We made an insane opening bid
             {
-                partnerInfo = "??? Opening bid was out of bounds. No info on partner";
+                partnerInfo = "???\nOpening bid was out of bounds. No info on partner";
             }
 
             return new BiddingSystemFeedback
