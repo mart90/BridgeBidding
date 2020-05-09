@@ -124,6 +124,11 @@ namespace BridgeBidding
                 Console.Write(prompt);
                 string input = ReadLine();
 
+                if (input == "")
+                {
+                    WriteUserErrorToConsole(errMessage, moreInfo);
+                }
+
                 string[] splitInput = input.Split(' ');
 
                 if (!int.TryParse(splitInput[0], out int highCardPoints))
@@ -171,6 +176,11 @@ namespace BridgeBidding
             {
                 Console.Write(prompt);
                 string input = ReadLine();
+
+                if (input == "")
+                {
+                    WriteUserErrorToConsole(errMessage, moreInfo);
+                }
 
                 if (input == "break")
                 {

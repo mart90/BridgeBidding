@@ -402,11 +402,11 @@ namespace BridgeBidding
                 }
                 else if (partnerBidSuit == Suit.Clubs)
                 {
-                    partnerInfo = "12-21 total points and either 5+ Clubs or 3 Clubs and 3 Diamonds";
+                    partnerInfo = "12-21 total points and either 4+ Clubs or 3 Clubs and 3 Diamonds";
                 }
                 else // Diamonds
                 {
-                    partnerInfo = "12-21 total points and either 5+ Diamonds or 4 Clubs and 4 Diamonds";
+                    partnerInfo = "12-21 total points and either 4+ Diamonds or 4 Clubs and 4 Diamonds";
                 }
 
                 if (hcp + UserHand.ShortSuitPoints() <= 5)
@@ -452,9 +452,9 @@ namespace BridgeBidding
 
                 // We either have no major suit fit, or we have a major suit fit and 13+ HCP
 
-                var suitsWeCanBidAtOneLevel = UserHand.SuitQualities.Where(e => (int)e.Suit < (int)partnerBidSuit);
+                var newSuitsWeCanBidAtOneLevel = UserHand.SuitQualities.Where(e => (int)e.Suit < (int)partnerBidSuit);
 
-                foreach (SuitQuality suitQuality in suitsWeCanBidAtOneLevel)
+                foreach (SuitQuality suitQuality in newSuitsWeCanBidAtOneLevel)
                 {
                     if (suitQuality.AmountOfCards >= 4)
                     {
@@ -478,38 +478,79 @@ namespace BridgeBidding
                     }
                 }
 
-                // We didn't have a 4+ card suit we could bit at the one level
+                // We didn't have a new 4+ card suit we could bit at the one level
 
                 if (hcp + UserHand.LongSuitPoints() >= 11)
                 {
                     // We have enough points to bid at the 2 level
 
-                    if (UserHand.LowestRankingLongestSuit.AmountOfCards >= 4)
+                    if (UserHand.LowestRankingLongestSuit.Suit == partnerBidSuit)
                     {
-                        if (hcp >= 19 && UserHand.LowestRankingLongestSuit.AmountOfCards >= 5)
+                        // Our lowest ranking longest suit is the same as partner's suit. Check if we have a fit
+
+                        int numberOfTricks = hcp + UserHand.ShortSuitPoints() >= 15 ? 3 : 2;
+
+                        if (partnerBidSuit == Suit.Clubs && UserHand.Clubs.AmountOfCards >= 5)
                         {
-                            // Jump if we have 19+ points and a 5+ card suit
                             return new BiddingSystemFeedback
                             {
-                                Bid = new Bid { Suit = UserHand.LowestRankingLongestSuit.Suit, NumberOfTricks = 3 },
+                                Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = numberOfTricks },
                                 PartnerInfo = partnerInfo,
-                                Reason = majorSuitFit ? majorSuitFitReason + jumpIfStrong : $"Response to 1 {partnerBidSuit.ToString()}. 19+ total points. We jump bid a new 5+ card suit."
+                                Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 11+ points. Clubs fit."
+                            };
+                        }
+                        if (partnerBidSuit == Suit.Diamonds && UserHand.Diamonds.AmountOfCards >= 4)
+                        {
+                            return new BiddingSystemFeedback
+                            {
+                                Bid = new Bid { Suit = Suit.Diamonds, NumberOfTricks = numberOfTricks },
+                                PartnerInfo = partnerInfo,
+                                Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 11+ points. Diamonds fit."
+                            };
+                        }
+
+                        if (hcp <= 15)
+                        {
+                            return new BiddingSystemFeedback
+                            {
+                                Bid = new Bid { Suit = Suit.NoTrump, NumberOfTricks = 2 },
+                                PartnerInfo = partnerInfo,
+                                Reason = $"Response to 1 {partnerBidSuit.ToString()}. 12-15 HCP. No fit and no new suits to bid."
                             };
                         }
 
                         return new BiddingSystemFeedback
                         {
-                            Bid = new Bid { Suit = UserHand.LowestRankingLongestSuit.Suit, NumberOfTricks = 2 },
+                            Bid = new Bid { Suit = Suit.NoTrump, NumberOfTricks = 3 },
                             PartnerInfo = partnerInfo,
-                            Reason = majorSuitFit ? majorSuitFitReason : $"Response to 1 {partnerBidSuit.ToString()}. 11+ total points. We bid a new suit at the 2 level."
+                            Reason = $"Response to 1 {partnerBidSuit.ToString()}. 16+ HCP. No fit and no new suits to bid."
                         };
                     }
+
+                    if (hcp >= 19 && UserHand.LowestRankingLongestSuit.AmountOfCards >= 5)
+                    {
+                        // Jump if we have 19+ points and a 5+ card suit
+                        return new BiddingSystemFeedback
+                        {
+                            Bid = new Bid { Suit = UserHand.LowestRankingLongestSuit.Suit, NumberOfTricks = 3 },
+                            PartnerInfo = partnerInfo,
+                            Reason = majorSuitFit ? majorSuitFitReason + jumpIfStrong : $"Response to 1 {partnerBidSuit.ToString()}. 19+ total points. We jump bid a new 5+ card suit."
+                        };
+                    }
+
+                    return new BiddingSystemFeedback
+                    {
+                        Bid = new Bid { Suit = UserHand.LowestRankingLongestSuit.Suit, NumberOfTricks = 2 },
+                        PartnerInfo = partnerInfo,
+                        Reason = majorSuitFit ? majorSuitFitReason : $"Response to 1 {partnerBidSuit.ToString()}. 11+ total points. We bid a new suit at the 2 level."
+                    };
                 }
 
-                // We might get here if we have a major suit fit and 13+ points, but no other 4+ card suits?
-                // In that case, just confirm the fit
+                // We have one of the following:
+                // - 6-10 points, no major suit fit, and no new 4+ card suit to bid at the one level
+                // - 13+ points and a major suit fit, but no other 4+ card suits to bid
 
-                if (hcp + UserHand.ShortSuitPoints() >= 13 && UserHand.SuitQualities.Single(e => e.Suit == partnerBidSuit).AmountOfCards >= 3)
+                if (hcp + UserHand.ShortSuitPoints() >= 13 && majorSuitFit)
                 {
                     if (hcp + UserHand.ShortSuitPoints() >= 16)
                     {
@@ -529,7 +570,7 @@ namespace BridgeBidding
                     };
                 }
 
-                // Who knows how we get here. But the cheat sheet says we can...
+                // We have 6-10 points, no major suit fit, and no new 4+ card suit to bid at the one level
 
                 if (!partnerBidSuit.IsMajor())
                 {
@@ -543,7 +584,7 @@ namespace BridgeBidding
                         {
                             Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = numberOfTricks },
                             PartnerInfo = partnerInfo,
-                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. Clubs fit."
+                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6+ points. Clubs fit."
                         };
                     }
                     if (partnerBidSuit == Suit.Diamonds && UserHand.Diamonds.AmountOfCards >= 4)
@@ -552,7 +593,7 @@ namespace BridgeBidding
                         {
                             Bid = new Bid { Suit = Suit.Diamonds, NumberOfTricks = numberOfTricks },
                             PartnerInfo = partnerInfo,
-                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. Diamonds fit."
+                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6+ points. Diamonds fit."
                         };
                     }
                 }
@@ -576,8 +617,6 @@ namespace BridgeBidding
                         Reason = $"Response to 1 {partnerBidSuit.ToString()}. 12-15 HCP. No fit and no new suits to bid."
                     };
                 }
-
-                // 16+ HCP, no possible fits. We bid game in NT
 
                 return new BiddingSystemFeedback
                 {
@@ -1027,11 +1066,11 @@ namespace BridgeBidding
 
                     if (partnerBidLevel == 2)
                     {
-                        partnerInfo = $"6-9 points and {numberToFit}+ {partnerBidSuit.ToString()}";
+                        partnerInfo = $"6-14 points and {numberToFit}+ {partnerBidSuit.ToString()}";
                     }
                     else
                     {
-                        partnerInfo = $"10+ points and {numberToFit}+ {partnerBidSuit.ToString()}";
+                        partnerInfo = $"15+ points and {numberToFit}+ {partnerBidSuit.ToString()}";
                     }
                 }
                 else if (partnerBidSuit != Suit.NoTrump)
