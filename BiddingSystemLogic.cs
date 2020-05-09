@@ -576,13 +576,11 @@ namespace BridgeBidding
                 {
                     // Partner bid 1 of a minor. See if we have a fit
 
-                    int numberOfTricks = hcp + UserHand.ShortSuitPoints() >= 10 ? 3 : 2;
-
                     if (partnerBidSuit == Suit.Clubs && UserHand.Clubs.AmountOfCards >= 5)
                     {
                         return new BiddingSystemFeedback
                         {
-                            Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = numberOfTricks },
+                            Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = 2 },
                             PartnerInfo = partnerInfo,
                             Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6+ points. Clubs fit."
                         };
@@ -591,7 +589,7 @@ namespace BridgeBidding
                     {
                         return new BiddingSystemFeedback
                         {
-                            Bid = new Bid { Suit = Suit.Diamonds, NumberOfTricks = numberOfTricks },
+                            Bid = new Bid { Suit = Suit.Diamonds, NumberOfTricks = 2 },
                             PartnerInfo = partnerInfo,
                             Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6+ points. Diamonds fit."
                         };
