@@ -488,7 +488,27 @@ namespace BridgeBidding
                     {
                         // Our lowest ranking longest suit is the same as partner's suit. Check if we have a fit
 
-                        int numberOfTricks = hcp + UserHand.ShortSuitPoints() >= 15 ? 3 : 2;
+                        int numberOfTricks;
+                        string pointsReason;
+                        int totalPoints = hcp + UserHand.ShortSuitPoints();
+                        if (totalPoints >= 17)
+                        {
+                            // Bid game immediately
+                            numberOfTricks = 5;
+                            pointsReason = "17+";
+                        }
+                        else if (totalPoints >= 14)
+                        {
+                            // Invite game
+                            numberOfTricks = 4;
+                            pointsReason = "14-16";
+                        }
+                        else
+                        {
+                            // Confirm the fit
+                            numberOfTricks = 3;
+                            pointsReason = "11-13";
+                        }
 
                         if (partnerBidSuit == Suit.Clubs && UserHand.Clubs.AmountOfCards >= 5)
                         {
@@ -496,7 +516,7 @@ namespace BridgeBidding
                             {
                                 Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = numberOfTricks },
                                 PartnerInfo = partnerInfo,
-                                Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 11+ points. Clubs fit."
+                                Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. {pointsReason} points. Clubs fit."
                             };
                         }
                         if (partnerBidSuit == Suit.Diamonds && UserHand.Diamonds.AmountOfCards >= 4)
@@ -505,7 +525,7 @@ namespace BridgeBidding
                             {
                                 Bid = new Bid { Suit = Suit.Diamonds, NumberOfTricks = numberOfTricks },
                                 PartnerInfo = partnerInfo,
-                                Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 11+ points. Diamonds fit."
+                                Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. {pointsReason} points. Diamonds fit."
                             };
                         }
 
@@ -582,7 +602,7 @@ namespace BridgeBidding
                         {
                             Bid = new Bid { Suit = Suit.Clubs, NumberOfTricks = 2 },
                             PartnerInfo = partnerInfo,
-                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6+ points. Clubs fit."
+                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6-10 points. Clubs fit."
                         };
                     }
                     if (partnerBidSuit == Suit.Diamonds && UserHand.Diamonds.AmountOfCards >= 4)
@@ -591,7 +611,7 @@ namespace BridgeBidding
                         {
                             Bid = new Bid { Suit = Suit.Diamonds, NumberOfTricks = 2 },
                             PartnerInfo = partnerInfo,
-                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6+ points. Diamonds fit."
+                            Reason = $"Reponse to 1 {partnerBidSuit.ToString()}. 6-10 points. Diamonds fit."
                         };
                     }
                 }
@@ -1064,11 +1084,19 @@ namespace BridgeBidding
 
                     if (partnerBidLevel == 2)
                     {
-                        partnerInfo = $"6-14 points and {numberToFit}+ {partnerBidSuit.ToString()}";
+                        partnerInfo = $"6-10 points and {numberToFit}+ {partnerBidSuit.ToString()}";
                     }
-                    else
+                    else if (partnerBidLevel == 3)
                     {
-                        partnerInfo = $"15+ points and {numberToFit}+ {partnerBidSuit.ToString()}";
+                        partnerInfo = $"11-13 points and {numberToFit}+ {partnerBidSuit.ToString()}";
+                    }
+                    else if (partnerBidLevel == 4)
+                    {
+                        partnerInfo = $"14-16 points and {numberToFit}+ {partnerBidSuit.ToString()}";
+                    }
+                    else if (partnerBidLevel == 5)
+                    {
+                        partnerInfo = $"17+ points and {numberToFit}+ {partnerBidSuit.ToString()}";
                     }
                 }
                 else if (partnerBidSuit != Suit.NoTrump)
